@@ -12,13 +12,17 @@ The AfterBurner profile switching can be enabled or disabled in the INI file. Th
 To add programs to the monitoring list, put them under [Programs] in the INI:
 
 [Programs]
+
 Program1.exe
+
 Program2.exe
 
 To add directories to the monitoring list, put them under [ProgramDirs]:
 
 [ProgramDirs]
+
 G:\Games
+
 C:\Some Other Folder
 
 Any program launched from the listed directory (and its sub-directories) will trigger the automated switching. When no programs from the listed directories are running, mining (and overclocking, if enabled) will be restored. You can manually switch between modes by right-clicking the system tray icon.
