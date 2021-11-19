@@ -12,9 +12,7 @@ The AfterBurner profile switching can be enabled or disabled in the INI file. Th
 To add programs to the monitoring list, put them under [Programs] in the INI:
 
 [Programs]
-
 Program1.exe
-
 Program2.exe
 
 To add directories to the monitoring list, put them under [ProgramDirs]:
