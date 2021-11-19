@@ -1,6 +1,6 @@
 ﻿; NiceHash Monitor
 ; by chinagreenelvis
-; Version 0.1
+; Version 0.2
  
 #NoEnv
 #SingleInstance force
@@ -16,10 +16,19 @@ Global RunningPrograms := []
 
 Global INIFile := "NiceHashMonitor.ini"
 
-Global NiceHashLocation
+Global QuickMiner := 0
+Global NiceHashMinerLocation
+Global NiceHashQuickMinerLocation
 Global HideIcon := 0
 Global TimerLength := 5000
 Global OverClockCommandsEnabled := 1
+Global OverClockOnCommand
+Global OverClockOffCommand
+
+Global NiceHashExecutable
+Global NiceHashWindow
+Global NiceHashLocation
+Global NiceHashLocationDir
 
 ReadINI()
 {
@@ -35,12 +44,29 @@ INIText =
 FileAppend, %INIText%, %INIFile%
 }
 
-	SetINI("NiceHashLocation", INIFile, "Settings", "NiceHashLocation", USERPROFILE "\AppData\Local\Programs\NiceHash Miner\NiceHashMiner.exe")
+	SetINI("QuickMiner", INIFile, "Settings", "QuickMiner", QuickMiner)
+	SetINI("NiceHashMinerLocation", INIFile, "Settings", "NiceHashMinerLocation", USERPROFILE "\AppData\Local\Programs\NiceHash Miner\NiceHashMiner.exe")
+	SetINI("NiceHashQuickMinerLocation", INIFile, "Settings", "NiceHashQuickMinerLocation", "C:\NiceHash\NiceHash QuickMiner\NiceHashQuickMiner.exe")
 	SetINI("HideIcon", INIFile, "Settings", "HideIcon", HideIcon)
 	SetINI("TimerLength", INIFile, "Settings", "TimerLength", TimerLength)
 	SetINI("OverClockCommandsEnabled", INIFile, "OverClock", "OverClockCommandsEnabled", OverClockCommandsEnabled)
 	SetINI("OverClockOnCommand", INIFile, "OverClock", "OverClockOnCommand", "C:\Program Files (x86)\MSI Afterburner\MSIAfterburner.exe -Profile2")
 	SetINI("OverClockOffCommand", INIFile, "OverClock", "OverClockOffCommand", "C:\Program Files (x86)\MSI Afterburner\MSIAfterburner.exe -Profile1")
+	
+	If (QuickMiner)
+	{
+		NiceHashExecutable := "NiceHashQuickMiner.exe"
+		NiceHashWindow := "NiceHash QuickMiner"
+		NiceHashLocation := NiceHashQuickMinerLocation
+	}
+	Else
+	{
+		NiceHashExecutable := "app_nhm.exe"
+		NiceHashWindow := "NiceHash Miner"
+		NiceHashLocation := NiceHashMinerLocation
+	}
+	
+	SplitPath, NiceHashLocation, , NiceHashLocationDir
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; MENU
@@ -67,12 +93,14 @@ MenuOpenINI()
 
 MenuStart()
 {
+	ReadINI()
 	SetTimer, RunTimer, Delete
 	MinerStart()
 }
 
 MenuStop()
 {
+	ReadINI()
 	SetTimer, RunTimer, Delete
 	MinerClose()
 }
@@ -142,8 +170,8 @@ class EventSink
 				;MsgBox, %ProgramFileName%
 				If ProgramFileName contains %A_LoopField%
 				{
+					;MsgBox %ProgramFileName%
 					RunningPrograms.Push(ProgramFileName)
-					MsgBox %ProgramFileName%
 				}
 			}
 			
@@ -171,31 +199,33 @@ GetProcessImageName(PID) {
 
 MinerClose()
 {
-	If (ProcessExist("app_nhm.exe"))
+	If (ProcessExist(NiceHashExecutable))
 	{
 		;MsgBox, Closing NiceHash Miner
-		WinClose, NiceHash Miner ahk_exe app_nhm.exe
-		WinWaitClose, NiceHash Miner ahk_exe app_nhm.exe
-		If (OverClockCommandsEnabled)
-		{
-			Run, %OverClockOffCommand%
-		}
+		WinClose, %NiceHashWindow% ahk_exe %NiceHashExecutable%
+		WinWaitClose, %NiceHashWindow% ahk_exe %NiceHashExecutable%
+	}
+	If (OverClockCommandsEnabled)
+	{
+		Run, %OverClockOffCommand%
 	}
 }
 
 MinerStart()
 {
-	If (!ProcessExist("app_nhm.exe"))
+	If (!ProcessExist(NiceHashExecutable))
 	{
 		;MsgBox, Starting NiceHash Miner
-		IniRead, NiceHashLocation, %INIFile%, Settings, NiceHashLocation
-		Run, %NiceHashLocation%
-		WinWait, NiceHash Miner ahk_exe app_nhm.exe
-		WinMinimize, NiceHash Miner ahk_exe app_nhm.exe
-		If (OverClockCommandsEnabled)
+		Run, %NiceHashLocation%, %NiceHashLocationDir%
+		If (!QuickMiner)
 		{
-			Run, %OverClockOnCommand%
+			WinWait, %NiceHashWindow% ahk_exe %NiceHashExecutable%
+			WinMinimize, %NiceHashWindow% ahk_exe %NiceHashExecutable%
 		}
+	}
+	If (OverClockCommandsEnabled)
+	{
+		Run, %OverClockOnCommand%
 	}
 }
 
