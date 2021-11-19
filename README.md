@@ -10,17 +10,15 @@ Currently only works with the NiceHash Miner (not QuickMiner). Works best when t
 The AfterBurner profile switching can be enabled or disabled in the INI file. The INI file will be created on startup and can be accessed by right-clicking on the system tray icon. By default, Profile 1 is set for non-mining and Profile 2 is set for mining.
 
 To add programs to the monitoring list, put them under [Programs] in the INI:
-
-[Programs]
-Program1.exe
-Program2.exe
-
+```
+[Programs]  
+Program1.exe  
+Program2.exe  
+```
 To add directories to the monitoring list, put them under [ProgramDirs]:
-
-[ProgramDirs]
-
-G:\Games
-
+```
+[ProgramDirs]  
+G:\Games  
 C:\Some Other Folder
-
+```
 Any program launched from the listed directory (and its sub-directories) will trigger the automated switching. When no programs from the listed directories are running, mining (and overclocking, if enabled) will be restored. You can manually switch between modes by right-clicking the system tray icon.
