@@ -1,6 +1,4 @@
 # NiceHash-Monitor
-Automaton for miners using gaming or workstation rigs.
-
 This AutoHotKey script will automate the NiceHash Miner and switch between AfterBurner profiles for users who wish to game or use other GPU-intensive software on the same rig. It will automatically detect programs listed in the INI file, or programs launched from directories listed in the INI file, and start/stop the mining/overclocking process.
 
 Currently only works with the NiceHash Miner (not QuickMiner). Works best when the miner and AfterBurner are set to run in the system tray.
