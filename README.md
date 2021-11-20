@@ -29,5 +29,5 @@ Revision History
 
 0.01 - Initial Release  
 0.02 - Bugfixes, updated to work with both miner and quickminer.  
-0.03 - More reliable code; removed timer mechanism and added full check of running processes at application start, process execution, and process termination. Added -q parameter to AfterBurner commands which will prevent AfterBurner from staying in the system tray if it is not already loaded. (Deletion of old INI file recommended.) Added better window-minimization code for miner. 
+0.03 - More reliable code; removed timer mechanism and added full check of running processes at application start, process execution, and process termination. Added -q parameter to AfterBurner commands which will prevent AfterBurner from staying in the system tray if it is not already loaded. (Deletion of old INI file recommended.) Added better window-minimization code for miner.  
 0.04 - Bugfixes with minimizing and manual mode-switching. Added minimization setting to INI (does not apply to QuickMiner).
