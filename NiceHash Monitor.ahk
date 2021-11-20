@@ -1,6 +1,6 @@
 ﻿; NiceHash Monitor
 ; by chinagreenelvis
-; Version 0.03
+; Version 0.04
  
 #NoEnv
 #SingleInstance force
@@ -17,6 +17,7 @@ Global RunningPrograms := []
 Global INIFile := "NiceHashMonitor.ini"
 
 Global QuickMiner := 0
+Global MinimizeMiner := 1
 Global NiceHashMinerLocation
 Global NiceHashQuickMinerLocation
 Global HideIcon := 0
@@ -31,6 +32,8 @@ Global NiceHashLocationDir
 
 Global AProcessIsRunning
 Global AProcessWasRunning
+
+Global EnableAuto := 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SETTINGS
 
@@ -49,6 +52,7 @@ FileAppend, %INIText%, %INIFile%
 }
 
 	SetINI("QuickMiner", INIFile, "Settings", "QuickMiner", QuickMiner)
+	SetINI("MinimizeMiner", INIFile, "Settings", "MinimizeMiner", MinimizeMiner)
 	SetINI("NiceHashMinerLocation", INIFile, "Settings", "NiceHashMinerLocation", USERPROFILE "\AppData\Local\Programs\NiceHash Miner\NiceHashMiner.exe")
 	SetINI("NiceHashQuickMinerLocation", INIFile, "Settings", "NiceHashQuickMinerLocation", "C:\NiceHash\NiceHash QuickMiner\NiceHashQuickMiner.exe")
 	SetINI("HideIcon", INIFile, "Settings", "HideIcon", HideIcon)
@@ -78,9 +82,9 @@ Menu, Tray, NoStandard
 Menu, Tray, NoDefault
 Menu, Tray, Add, Hide Icon, MenuHideIcon
 Menu, Tray, Add, Open INI, MenuOpenINI
-Menu, Tray, Add, Start NiceHash, MenuStart
+Menu, Tray, Add, Force Start NiceHash, MenuStart
 Menu, Tray, Add, Stop NiceHash, MenuStop
-Menu, Tray, Add, Auto NiceHash, MenuAuto
+Menu, Tray, Add, Set NiceHash to Auto, MenuAuto
 Menu, Tray, Add, Quit NiceHash Monitor, MenuQuit
 
 MenuHideIcon()
@@ -96,19 +100,21 @@ MenuOpenINI()
 
 MenuStart()
 {
-	;SetTimer, RunTimer, Delete
+	AProcessIsRunning := NULL
+	EnableAuto := 0
 	MinerStart()
 }
 
 MenuStop()
 {
-	;SetTimer, RunTimer, Delete
+	AProcessIsRunning := NULL
+	EnableAuto := 0
 	MinerStop()
 }
 
 MenuAuto()
 {
-	;SetTimer, RunTimer, %AppCheckTimerLength%
+	EnableAuto := 1
 	CheckProcesses()
 }
 
@@ -162,7 +168,10 @@ class EventSinkCreate
 {
   OnObjectReady(obj)
 	{
-		CheckProcesses()
+		If (EnableAuto)
+		{
+			CheckProcesses()
+		}
   }
 }
 
@@ -170,7 +179,10 @@ class EventSinkDelete
 {
 	OnObjectReady(obj)
 	{
-		CheckProcesses()
+		If (EnableAuto)
+		{
+			CheckProcesses()
+		}
 	}
 }
 
@@ -187,7 +199,7 @@ CheckProcesses()
 		}
 	}
 
-	If (AProcessWasRunning != AProcessIsRunning)
+	If (EnableAuto) && (AProcessWasRunning != AProcessIsRunning)
 	{
 		If (!AProcessIsRunning)
 		{
@@ -253,18 +265,23 @@ MinerStart()
 	{
 		;MsgBox, Starting NiceHash Miner
 		Run, %NiceHashLocation%, %NiceHashLocationDir%
-		If (!QuickMiner)
+		If (!QuickMiner && MinimizeMiner)
 		{
-			WinWait, %NiceHashWindow% ahk_exe %NiceHashExecutable%, 5
-			WinGet, WindowList, List, %NiceHashWindow% ahk_exe %NiceHashExecutable%
-			Loop, %WindowList%
+			WaitForWindow:
+			Loop
 			{
-				Window := % "ahk_id" . WindowList%A_Index%
-				;MsgBox, %Window%
-				WinGet, WindowStyle, Style, %Window%
-				If (WindowStyle & 0x20000)
+				WinGet, WindowList, List, %NiceHashWindow% ahk_exe %NiceHashExecutable%
+				Loop, %WindowList%
 				{
-					WinMinimize, %Window%
+					Window := % "ahk_id" . WindowList%A_Index%
+					;MsgBox, %Window%
+					WinGet, WindowStyle, Style, %Window%
+					If (WindowStyle & 0x20000)
+					{
+						Sleep, 1000
+						WinMinimize, %Window%
+						Break WaitForWindow
+					}
 				}
 			}
 		}
