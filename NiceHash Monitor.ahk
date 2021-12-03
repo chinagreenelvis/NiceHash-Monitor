@@ -1,7 +1,7 @@
-﻿; NiceHash Monitor
+; NiceHash Monitor
 ; by chinagreenelvis
 ; Version 0.04
- 
+
 #NoEnv
 #SingleInstance force
 #Persistent
@@ -46,6 +46,8 @@ INIText =
 [Settings]
 [Programs]
 [ProgramDirs]
+[ExcludedPrograms]
+[ExcludedProgramDirs]
 [OverClock]
 )
 FileAppend, %INIText%, %INIFile%
@@ -59,7 +61,7 @@ FileAppend, %INIText%, %INIFile%
 	SetINI("OverClockCommandsEnabled", INIFile, "OverClock", "OverClockCommandsEnabled", OverClockCommandsEnabled)
 	SetINI("OverClockOnCommand", INIFile, "OverClock", "OverClockOnCommand", "C:\Program Files (x86)\MSI Afterburner\MSIAfterburner.exe -Profile2 -q")
 	SetINI("OverClockOffCommand", INIFile, "OverClock", "OverClockOffCommand", "C:\Program Files (x86)\MSI Afterburner\MSIAfterburner.exe -Profile1 -q")
-	
+
 	If (QuickMiner)
 	{
 		NiceHashExecutable := "NiceHashQuickMiner.exe"
@@ -72,7 +74,7 @@ FileAppend, %INIText%, %INIFile%
 		NiceHashWindow := "NiceHash Miner"
 		NiceHashLocation := NiceHashMinerLocation
 	}
-	
+
 	SplitPath, NiceHashLocation, , NiceHashLocationDir
 }
 
@@ -220,6 +222,11 @@ ProcessStopsMining(Process)
 	ProcessImageName := GetProcessImageName(Process.ProcessID)
 	If (ProcessImageName)
 	{
+		if (IsExcludedProcess(ProcessName, ProcessImageName))
+		{
+			return False
+		}
+
 		;MsgBox, % ProcessImageName
 		IniRead, Programs, %INIFile%, Programs
 		Loop, Parse, Programs, `n
@@ -239,6 +246,30 @@ ProcessStopsMining(Process)
 			{
 				Return True
 			}
+		}
+	}
+}
+
+IsExcludedProcess(ProcessName, ProcessImageName)
+{
+	;MsgBox, % ProcessImageName
+	IniRead, ExcludedPrograms, %INIFile%, ExcludedPrograms
+	Loop, Parse, ExcludedPrograms, `n
+	{
+		;MsgBox, %A_LoopField%
+		If ProcessName contains %A_LoopField%
+		{
+			Return True
+		}
+	}
+
+	IniRead, ExcludedProgramDirs, %INIFile%, ExcludedProgramDirs
+	Loop, Parse, ExcludedProgramDirs, `n
+	{
+		;MsgBox, %A_LoopField%
+		If ProcessImageName contains %A_LoopField%
+		{
+			Return True
 		}
 	}
 }
